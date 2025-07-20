@@ -53,7 +53,7 @@ const Dashboard = () => {
   }, [search, sortBy, filterChange, coins]);
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 bg-gradient-to-b from-gray-100 to-gray-200">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Top 10 Cryptocurrencies
       </h1>

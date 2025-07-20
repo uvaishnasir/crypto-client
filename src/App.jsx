@@ -1,10 +1,13 @@
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import CoinDetail from "./pages/CoinDetail";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Dashboard />
-    </div>
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/coin/:coinId" element={<CoinDetail />} />
+    </Routes>
   );
 }
 
