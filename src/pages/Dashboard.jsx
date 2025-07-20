@@ -1,56 +1,97 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchCoins } from "../services/coinAPI";
 import CoinCard from "../components/CoinCard";
 
 const Dashboard = () => {
   const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [filteredCoins, setFilteredCoins] = useState([]);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [filterChange, setFilterChange] = useState("all");
 
   const loadData = async () => {
-    try {
-      const data = await fetchCoins();
-      setCoins(data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching coins:", error);
-      setLoading(false);
-    }
+    const data = await fetchCoins();
+    setCoins(data);
+    setFilteredCoins(data);
   };
 
   useEffect(() => {
     loadData();
-
-    const interval = setInterval(loadData, 30 * 60 * 1000); // every 30 min
+    const interval = setInterval(loadData, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    let updated = [...coins];
+
+    // 🔍 Filter by search
+    if (search) {
+      updated = updated.filter(
+        (coin) =>
+          coin.name.toLowerCase().includes(search.toLowerCase()) ||
+          coin.symbol.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // 🔴🟢 Filter by 24h change
+    if (filterChange === "gainers") {
+      updated = updated.filter((coin) => coin.change24h > 0);
+    } else if (filterChange === "losers") {
+      updated = updated.filter((coin) => coin.change24h < 0);
+    }
+
+    // ↕️ Sort
+    if (sortBy === "price") {
+      updated.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "marketCap") {
+      updated.sort((a, b) => b.marketCap - a.marketCap);
+    } else if (sortBy === "change") {
+      updated.sort((a, b) => b.change24h - a.change24h);
+    }
+
+    setFilteredCoins(updated);
+  }, [search, sortBy, filterChange, coins]);
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-blue-600">
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Top 10 Cryptocurrencies
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {coins.map((coin) => (
-          <div key={coin.coinId} className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="text-xl font-semibold mb-2">
-              {coin.name} ({coin.symbol.toUpperCase()})
-            </h2>
-            <p>💰 Price: ${coin.price.toLocaleString()}</p>
-            <p>🏦 Market Cap: ${coin.marketCap.toLocaleString()}</p>
-            <p>
-              📉 24h Change:{" "}
-              <span
-                className={
-                  coin.change24h >= 0 ? "text-green-600" : "text-red-500"
-                }
-              >
-                {coin.change24h.toFixed(2)}%
-              </span>
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              ⏱ Last Updated: {new Date(coin.lastUpdated).toLocaleString()}
-            </p>
-          </div>
+
+      {/* 🔎 Search & Filters */}
+      <div className="flex flex-wrap gap-4 mb-6 items-center">
+        <input
+          type="text"
+          placeholder="Search coin..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-4 py-2 border rounded-md w-full md:w-60 bg-white"
+        />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-4 py-2 border rounded-md bg-white cursor-pointer"
+        >
+          <option value="">Sort</option>
+          <option value="price">Price</option>
+          <option value="marketCap">Market Cap</option>
+          <option value="change">24h Change</option>
+        </select>
+        <select
+          value={filterChange}
+          onChange={(e) => setFilterChange(e.target.value)}
+          className="px-4 py-2 border rounded-md bg-white cursor-pointer"
+        >
+          <option value="all">All</option>
+          <option value="gainers">Gainers</option>
+          <option value="losers">Losers</option>
+        </select>
+      </div>
+
+      {/* 📦 Coin Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCoins.map((coin) => (
+          <CoinCard key={coin.coinId} coin={coin} />
         ))}
       </div>
     </div>
