@@ -17,6 +17,12 @@ It displays the top 10 cryptocurrencies with search, sorting, filtering, and cha
 - 🔁 Auto-refresh every 30 mins
 - 💨 Fully responsive with Tailwind CSS
 
+#Dashboard 
+<img width="1731" height="728" alt="image" src="https://github.com/user-attachments/assets/bb204c22-5c11-4b94-853b-9b16f8d856ea" />
+
+
+<img width="1267" height="689" alt="image" src="https://github.com/user-attachments/assets/daaee99c-66ae-46b0-b7b9-bd3283f15591" />
+
 ---
 
 ## 📦 Tech Stack
