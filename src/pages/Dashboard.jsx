@@ -8,11 +8,19 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filterChange, setFilterChange] = useState("all");
+  const [loading, setLoading] = useState(true); // ⬅️ NEW
 
   const loadData = async () => {
-    const data = await fetchCoins();
-    setCoins(data);
-    setFilteredCoins(data);
+    try {
+      setLoading(true); // ⬅️ Show loading
+      const data = await fetchCoins();
+      setCoins(data);
+      setFilteredCoins(data);
+    } catch (error) {
+      console.error("Error fetching coins:", error);
+    } finally {
+      setLoading(false); // ⬅️ Hide loading
+    }
   };
 
   useEffect(() => {
@@ -24,7 +32,6 @@ const Dashboard = () => {
   useEffect(() => {
     let updated = [...coins];
 
-    // 🔍 Filter by search
     if (search) {
       updated = updated.filter(
         (coin) =>
@@ -33,14 +40,12 @@ const Dashboard = () => {
       );
     }
 
-    // 🔴🟢 Filter by 24h change
     if (filterChange === "gainers") {
       updated = updated.filter((coin) => coin.change24h > 0);
     } else if (filterChange === "losers") {
       updated = updated.filter((coin) => coin.change24h < 0);
     }
 
-    // ↕️ Sort
     if (sortBy === "price") {
       updated.sort((a, b) => b.price - a.price);
     } else if (sortBy === "marketCap") {
@@ -88,12 +93,19 @@ const Dashboard = () => {
         </select>
       </div>
 
-      {/* 📦 Coin Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCoins.map((coin) => (
-          <CoinCard key={coin.coinId} coin={coin} />
-        ))}
-      </div>
+      {/* 📦 Coin Grid or Loading */}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <div className="w-8 h-8 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+        </div>
+
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCoins.map((coin) => (
+            <CoinCard key={coin.coinId} coin={coin} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
